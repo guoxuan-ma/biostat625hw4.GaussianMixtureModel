@@ -1,5 +1,5 @@
 test_that("GaussianMixtureModel works", {
-  for (i in 1:20) {
+  for (i in 1:10) {
     mean_1 = runif(1, -10, 0)
     mean_2 = runif(1, 5, 15)
     X = matrix(0, nrow = 500, ncol = 2)
