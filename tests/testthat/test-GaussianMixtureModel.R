@@ -1,5 +1,6 @@
 test_that("GaussianMixtureModel works", {
-  for (i in 1:10) {
+  set.seed(2021)
+  for (i in 1:20) {
     mean_1 = runif(1, -10, 0)
     mean_2 = runif(1, 5, 15)
     X = matrix(0, nrow = 500, ncol = 2)
@@ -13,5 +14,4 @@ test_that("GaussianMixtureModel works", {
     expect_equal(sum((gmm$mu - c(mean_1, mean_2, mean_1, mean_2))^2) < 0.1, TRUE)
     expect_equal(acc > 0.99, TRUE)
   }
-
 })
