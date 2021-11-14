@@ -1,11 +1,12 @@
 Package: biostat625hw4.GaussianMixtureModel
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Gaussian Mixture Model by the EM Algorithm
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Guoxuan Ma
+Maintainer: Guoxuan Ma <gxma@umich.edu>
+Description: Fit a Gaussian Mixture Model by the EM Algorithm
+Depends: mvtnorm
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.1.2
