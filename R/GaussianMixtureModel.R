@@ -1,19 +1,44 @@
-# Gaussian Mixture Model
-#
-# Fit a Gaussian Mixture Model by the EM Algorithm
-#
 #'@import mvtnorm
 #'
-#'@para X: an N by p data matrix
-#'@para k: integer, number of Gaussian components
-#'@para initial_mu: a k by p matrix, the initial points of the EM Algorithm; each row corresponds to one component
-#'@para max_iter: integer, the maximum number of EM iterations
-#'@para tol: scaler, used as the convergence criteria; if the distance between centroids in the current iteration and the previous iteration is less than tol, then the algorithm stops early
+#' Gaussian Mixture Model
 #'
-#'@return mu: a k by p matrix, fitted centroids; each row corresponds to one component
-#'@return Sigma: a p by p by k array, fitted covariance matrices
-#'@return r: an N by k matrix, fitted responsibility; each row corresponds to one sample; the value (i, j) is the fitted probability of sample i belonging to component j
-#'@return loglikelihood: a numeric vector recording loglikelihood throughout iterations
+#' Fit a Gaussian Mixture Model by the EM Algorithm
+#'
+#'
+#'@para X an N by p data matrix
+#'@para k integer, number of Gaussian components
+#'@para initial_mu a k by p matrix, the initial points of the EM Algorithm; each row corresponds to one component
+#'@para max_iter integer, the maximum number of EM iterations
+#'@para tol scaler, used as the convergence criteria; if the distance between centroids in the current iteration and the previous iteration is less than tol, then the algorithm stops early
+#'
+#'@return A list containing mu, Sigma, r and loglikelihood \cr
+#'mu: a k by p matrix, fitted centroids; each row corresponds to one component \cr
+#'Sigma: a p by p by k array, fitted covariance matrices \cr
+#'r: an N by k matrix, fitted responsibility; each row corresponds to one sample; the value (i, j) is the fitted probability of sample i belonging to component j \cr
+#'loglikelihood: a numeric vector recording loglikelihood throughout iterations \cr
+#'
+#'@example
+#'# create samples from a two-component Gaussian Mixture
+#'X = matrix(0, nrow = 500, ncol = 2)
+#'z = sample(2, 500, replace = T)
+#'X[which(z == 1), ] = rnorm(sum(z == 1) * 2, mean = 0, sd = 1)
+#'X[which(z == 2), ] = rnorm(sum(z == 2) * 2, mean = 5, sd = 1)
+#'
+#'# fit a Gaussian Mixture Model to the data
+#'gmm = GaussianMixtureModel(X, 2, initial_mu = matrix(c(0, 1, 0, 1), nrow = 2, ncol = 2))
+#'
+#'# prediction
+#'centroids = gmm$mu
+#'r = gmm$r
+#'cluster = apply(r, 1, which.max)
+#'
+#'# plot
+#'plot(X[, 1], X[, 2], col = c('orange', 'red')[cluster], cex = 0.5)
+#'points(x = centroids[, 1], y = centroids[, 2], pch = 10, col = 'blue', cex = 2)
+#'legend(x = 'topleft',
+#'       legend = c('cluster 1', 'cluster 2', 'centers'),
+#'       col = c('orange', 'red', 'blue'),
+#'       pch = c(1, 1, 10))
 #'
 #'@export
 GaussianMixtureModel = function(X, k, initial_mu, max_iter = 100, tol = 1e-8) {
@@ -76,7 +101,7 @@ GaussianMixtureModel = function(X, k, initial_mu, max_iter = 100, tol = 1e-8) {
 
     # check for convergence
     if (sqrt( sum((mu - mu_prev)^2) ) < tol) {
-      cat('converge at iteration', i)
+      cat('converges at iteration', i)
       loglik_list = loglik_list[1:i]
       break
     }
