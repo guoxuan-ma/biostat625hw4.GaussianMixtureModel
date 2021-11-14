@@ -13,7 +13,6 @@
 #' mu: a k by p matrix, fitted centroids; each row corresponds to one component \cr
 #' Sigma: a p by p by k array, fitted covariance matrices \cr
 #' r: an N by k matrix, fitted responsibility; each row corresponds to one sample; the value (i, j) is the fitted probability of sample i belonging to component j \cr
-#' loglikelihood: a numeric vector recording loglikelihood throughout iterations \cr
 #'
 #' @examples
 #' # create samples from a two-component Gaussian Mixture
@@ -40,18 +39,6 @@
 #'
 #' @export
 GaussianMixtureModel = function(X, k, initial_mu, max_iter = 100, tol = 1e-8) {
-  # function used to compute loglikelihood
-  loglikelihood = function(X, pi, mu, Sigma) {
-    N = dim(X)[1]
-    k = length(pi)
-    llk = matrix(0, nrow = N, ncol = k)
-    for (l in 1:2) {
-      llk[, l] = pi[l] * dmvnorm(X, mean = mu[l, ], sigma = Sigma[, , l])
-    }
-    value = sum(log(rowSums(llk)))
-    return(value)
-  }
-
   N = dim(X)[1]     # number of samples
   p = dim(X)[2]     # number of features
   loglik_list = rep(0, max_iter)
@@ -69,8 +56,11 @@ GaussianMixtureModel = function(X, k, initial_mu, max_iter = 100, tol = 1e-8) {
     # update responsibility
     r = matrix(0, nrow = N, ncol = k)    # initialize the responsibility
     for (l in 1:k) {
-      r[, l] = pi[l] * dmvnorm(X, mean = mu[l, ], sigma = Sigma[, , l])
+      r[, l] = log(pi[l]) + dmvnorm(X, mean = mu[l, ], sigma = Sigma[, , l], log = TRUE)
     }
+    min.logr = apply(r, 1, min)
+    r = r - min.logr
+    r = exp(r)
     r = r / rowSums(r)
 
     # update N_k
@@ -94,19 +84,14 @@ GaussianMixtureModel = function(X, k, initial_mu, max_iter = 100, tol = 1e-8) {
       Sigma[, , l] = s / N_k[l]
     }
 
-    # compute loglikelihood
-    loglik_list[i] = loglikelihood(X, pi, mu, Sigma)
-
     # check for convergence
     if (sqrt( sum((mu - mu_prev)^2) ) < tol) {
       cat('converges at iteration', i)
-      loglik_list = loglik_list[1:i]
       break
     }
   }
 
   return(list(mu = mu,
               Sigma = Sigma,
-              r = r,
-              loglikelihood = loglik_list))
+              r = r))
 }
