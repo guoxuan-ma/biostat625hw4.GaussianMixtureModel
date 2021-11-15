@@ -15,14 +15,15 @@ GaussianMixtureModel(X, k, initial_mu, max_iter = 100, tol = 1e-08)
 
 \item{max_iter}{integer, the maximum number of EM iterations}
 
-\item{tol}{scaler, used as the convergence criteria; if the distance between centroids in the current iteration and the previous iteration is less than tol, then the algorithm stops early}
+\item{tol}{scaler or NULL, used as the convergence criteria \cr
+if tol is scaler, if the distance between centroids in the current iteration and the previous iteration is less than tol, then the algorithm stops early \cr
+if tol is NULL, then early stopping criterion does not apply}
 }
 \value{
 A list containing mu, Sigma, r and loglikelihood \cr
 mu: a k by p matrix, fitted centroids; each row corresponds to one component \cr
 Sigma: a p by p by k array, fitted covariance matrices \cr
 r: an N by k matrix, fitted responsibility; each row corresponds to one sample; the value (i, j) is the fitted probability of sample i belonging to component j \cr
-loglikelihood: a numeric vector recording loglikelihood throughout iterations \cr
 }
 \description{
 Fit a Gaussian Mixture Model by the EM Algorithm

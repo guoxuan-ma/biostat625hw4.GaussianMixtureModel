@@ -1,0 +1,101 @@
+---
+title: "tutorial"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Let's first load the package.
+```{r setup}
+library(biostat625hw4.GaussianMixtureModel)
+```
+This package implements the EM Algorithm for Gaussian Mixture Models. The main function that users can access is 'GaussianMixtureModel'. You need a N by p data matrix, the number of components k, a k by p matrix specifying the initial points as input arguments. You may also determine the maximum number of EM iterations and the convergence criterion. For the details of the arguments and returns, you can refer to the help page after loading the package.
+```{r}
+?GaussianMixtureModel
+```
+
+
+### Example
+Let's look at an example where we generate data from a two-component Gaussian Mixture Model and use the package to fit the data. The first component is centered at 0 and has standard deviation 1; the second centers around 5 and has standard deviation 1. 
+```{r}
+set.seed(2021)
+
+# create samples from a two-component Gaussian Mixture
+X = matrix(0, nrow = 500, ncol = 2)
+z = sample(2, 500, replace = TRUE)
+X[which(z == 1), ] = rnorm(sum(z == 1) * 2, mean = 0, sd = 1)
+X[which(z == 2), ] = rnorm(sum(z == 2) * 2, mean = 5, sd = 1)
+```
+Then, we fit the data with our GaussianMixtureModel function.
+```{r}
+# fit a Gaussian Mixture Model to the data
+gmm = GaussianMixtureModel(X = X, k = 2, initial_mu = matrix(c(0, 1, 0, 1), nrow = 2, ncol = 2), max_iter = 100, tol = 1e-8)
+```
+The fitted centers of the two components are
+```{r}
+centroids = gmm$mu
+gmm$mu
+```
+The accuracy is
+```{r}
+r = gmm$r
+cluster = apply(r, 1, which.max)
+acc = max(sum(cluster == z), sum(cluster != z)) / 500
+acc
+```
+Then, we plot the fitted results
+```{r, fig.height = 5, fig.width = 6}
+plot(X[, 1], X[, 2], col = c('orange', 'red')[cluster], cex = 0.5)
+points(x = centroids[, 1], y = centroids[, 2], pch = 10, col = 'blue', cex = 2)
+legend(x = 'topleft',
+      legend = c('cluster 1', 'cluster 2', 'centers'),
+      col = c('orange', 'red', 'blue'),
+      pch = c(1, 1, 10))
+```
+
+where points in orange are those predicted to be in componet 1 while points in red are predicted in component 2; the blue points are fitted centers. 
+
+We now compare our GaussianMixtureModel function to its counterpart in ClusterR package.
+```{r}
+library(ClusterR)
+gmm2 = GMM(X, 2, em_iter = 100)
+```
+We first compare the difference of fitted centers.
+```{r}
+norm(gmm$mu - gmm2$centroids, type = 'F')
+```
+The differences is very small, and it mainly comes from the choice of initial points. 
+Then, we compare accuracy.
+```{r}
+cluster2 = apply(gmm2$Log_likelihood, 1, which.max)
+acc2 = max(sum(cluster2 == z), sum(cluster2 != z)) / 500
+acc2
+```
+This is exactly the same with the accuracy obtained by our package. 
+Finally, we compare the efficiency.
+```{r, results = 'hide'}
+t1 = system.time(
+  for (i in 1:10) {
+    GaussianMixtureModel(X = X, k = 2, initial_mu = matrix(c(0, 1, 0, 1), nrow = 2, ncol = 2), max_iter = 100, tol = 1e-8)
+  }
+)
+
+t2 = system.time(
+  for (i in 1:10) {
+    GMM(X, 2, em_iter = 100)
+  }
+)
+```
+Both functions apply early stopping. The difference is noticeable, which is understandable since GMM in ClusterR is implemented in C++ while our implementation, despite the use of vectorization whenever possible, is fully written in R. However, the speed of our package is still acceptable with application on small scale of data. 
+```{r}
+t1; t2
+```

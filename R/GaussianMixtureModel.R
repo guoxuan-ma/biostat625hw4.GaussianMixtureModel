@@ -7,7 +7,9 @@
 #' @param k integer, number of Gaussian components
 #' @param initial_mu a k by p matrix, the initial points of the EM Algorithm; each row corresponds to one component
 #' @param max_iter integer, the maximum number of EM iterations
-#' @param tol scaler, used as the convergence criteria; if the distance between centroids in the current iteration and the previous iteration is less than tol, then the algorithm stops early
+#' @param tol scaler or NULL, used as the convergence criteria \cr
+#' if tol is scaler, if the distance between centroids in the current iteration and the previous iteration is less than tol, then the algorithm stops early \cr
+#' if tol is NULL, then early stopping criterion does not apply
 #'
 #' @return A list containing mu, Sigma, r and loglikelihood \cr
 #' mu: a k by p matrix, fitted centroids; each row corresponds to one component \cr
@@ -50,7 +52,6 @@ GaussianMixtureModel = function(X, k, initial_mu, max_iter = 100, tol = 1e-8) {
 
   # EM Algorithm
   for (i in 1:max_iter) {
-    #browser()
     mu_prev = mu
 
     # update responsibility
@@ -59,7 +60,7 @@ GaussianMixtureModel = function(X, k, initial_mu, max_iter = 100, tol = 1e-8) {
       r[, l] = log(pi[l]) + dmvnorm(X, mean = mu[l, ], sigma = Sigma[, , l], log = TRUE)
     }
     min.logr = apply(r, 1, min)
-    r = r - min.logr
+    r = r - min.logr    # for numerical stability
     r = exp(r)
     r = r / rowSums(r)
 
@@ -85,9 +86,11 @@ GaussianMixtureModel = function(X, k, initial_mu, max_iter = 100, tol = 1e-8) {
     }
 
     # check for convergence
-    if (sqrt( sum((mu - mu_prev)^2) ) < tol) {
-      cat('converges at iteration', i)
-      break
+    if (length(tol) > 0) {
+      if (sqrt( sum((mu - mu_prev)^2) ) < tol) {
+        cat('converges at iteration', i, '\n')
+        break
+      }
     }
   }
 
