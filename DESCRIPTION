@@ -5,7 +5,7 @@ Version: 0.1.0
 Author: Guoxuan Ma
 Maintainer: Guoxuan Ma <gxma@umich.edu>
 Description: Fit a Gaussian Mixture Model by the EM Algorithm
-Depends: mvtnorm
+Depends: mvtnorm, ClusterR
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
