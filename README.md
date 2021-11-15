@@ -22,12 +22,12 @@ library('biostat625hw4.GaussianMixtureModel')
 
 Usage and Examples
 ------------------
-The main function that users can access is 'GaussianMixtureModel'. You need a N by p data matrix, the number of components k, a k by p matrix specifying the initial points as input arguments. You may also determine the maximum number of EM iterations and the convergence criterion. For the details of the arguments and returns, you can refer to the help page after loading the package
+The main function that users can access is 'GaussianMixtureModel'. You need a N by p data matrix, the number of components k, a k by p matrix specifying the initial points as input arguments. You may also determine the maximum number of EM iterations and the convergence criterion. For the details of the arguments and returns, you can refer to the help page after loading the package.
 ``` r
 library('biostat625hw4.GaussianMixtureModel')
 ?GaussianMixtureModel
 ```
-Here is an example of fitting a Gaussian Mixture Model on simulated data with the function
+Here is an example of fitting a Gaussian Mixture Model on simulated data with the function.
 ``` r
 # create samples from a two-component Gaussian Mixture
 X = matrix(0, nrow = 500, ncol = 2)
